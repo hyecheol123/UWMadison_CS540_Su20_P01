@@ -73,31 +73,26 @@ public class Dataset {
   /**
    * Method to load training features and labels to the instance
    */
-  public void loadTrainingSet() {
-    try(BufferedReader reader = new BufferedReader(new FileReader(csvFileLocation))) {
-      String datapoint = reader.readLine(); // read Line one by one (one of each line indicating one datapoint)
-      while(datapoint != null) {
-        String[] labelAndFeatureEntries = datapoint.split(","); // csv file is split by comma
-        int classLabel = Integer.parseInt(labelAndFeatureEntries[0]); // get classLabel for the datapoint
+  public void loadTrainingSet() throws IOException{
+    BufferedReader reader = new BufferedReader(new FileReader(csvFileLocation));
+    String datapoint = reader.readLine(); // read Line one by one (one of each line indicating one datapoint)
+    while(datapoint != null) {
+      String[] labelAndFeatureEntries = datapoint.split(","); // csv file is split by comma
+      int classLabel = Integer.parseInt(labelAndFeatureEntries[0]); // get classLabel for the datapoint
 
-        // only interested in the cases with class label with label0 or label1
-        if(classLabel == label0) {
-          // add training instance
-          trainingLabels.add(0);
-          trainingFeatures.add(loadTrainingFeatures(labelAndFeatureEntries));
-        } else if(classLabel == label1) {
-          // add training instance
-          trainingLabels.add(1);
-          trainingFeatures.add(loadTrainingFeatures(labelAndFeatureEntries));
-        }
-
-        // get the next line
-        datapoint = reader.readLine();
+      // only interested in the cases with class label with label0 or label1
+      if(classLabel == label0) {
+        // add training instance
+        trainingLabels.add(0);
+        trainingFeatures.add(loadTrainingFeatures(labelAndFeatureEntries));
+      } else if(classLabel == label1) {
+        // add training instance
+        trainingLabels.add(1);
+        trainingFeatures.add(loadTrainingFeatures(labelAndFeatureEntries));
       }
-    } catch(FileNotFoundException e) {
-      System.out.println(csvFileLocation + " Not Found.");
-    } catch(IOException e) {
-      System.out.println("Interrupted I/O Operation");
+
+      // get the next line
+      datapoint = reader.readLine();
     }
   }
 
@@ -125,20 +120,15 @@ public class Dataset {
   /**
    * Method to load testing features to the instance
    */
-  public void loadTestingSet() {
-    try(BufferedReader reader = new BufferedReader(new FileReader(testSetLocation))) {
-      String datapoint = reader.readLine(); // read Line one by one (one of each line indicating one datapoint)
-      while(datapoint != null) {
-        String[] featureEntries = datapoint.split(","); // csv file is split by comma
-        testingFeatures.add(loadTestingFeatures(featureEntries)); // add testing instance
+  public void loadTestingSet() throws IOException{
+    BufferedReader reader = new BufferedReader(new FileReader(testSetLocation));
+    String datapoint = reader.readLine(); // read Line one by one (one of each line indicating one datapoint)
+    while(datapoint != null) {
+      String[] featureEntries = datapoint.split(","); // csv file is split by comma
+      testingFeatures.add(loadTestingFeatures(featureEntries)); // add testing instance
 
-        // get the next line
-        datapoint = reader.readLine();
-      }
-    } catch(FileNotFoundException e) {
-      System.out.println(testSetLocation + "Not Found");
-    } catch(IOException e) {
-      System.out.println("Interrupted I/O Operation");
+      // get the next line
+      datapoint = reader.readLine();
     }
   }
 
