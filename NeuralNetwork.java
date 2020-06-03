@@ -121,8 +121,14 @@ public class NeuralNetwork {
       System.out.print("Epoch " + epoch + " ");
       logWriter.write("Epoch" + epoch + " ");
 
-      // TODO
+      // TODO: Update Weights and Bias
+      // TODO: Calculate New Activation
+      // TODO: Check for convergence
+      // TODO: Flush log occasionally
     }
+    // TODO flush log
+
+    // TODO Questions
   }
 
   /**
