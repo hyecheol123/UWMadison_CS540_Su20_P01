@@ -22,8 +22,8 @@ All the parsing and data-preprocessing parts are implemented in
 [Dataset.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/Dataset.java).
 
 [Related Questions]  
-**Q1**. save Feature Vector of any one training image. 
-        Code located in [LogisticRegression]().saveFeatureVector() method.
+- **Q1**: save Feature Vector of any one training image.   
+          Code located in [LogisticRegression]().saveFeatureVector() method.
 
 
 ### Logistic Regression Model
@@ -35,5 +35,10 @@ as I think it is much more reasonable as we are interested on the current model'
 not the previous model's one.  
 
 [Related Questions]  
-**Q2**. save model weights and bias of the logistic regression model
-        Code located in [LogisticRegression]().saveModel() method.
+- **Q2**: save model weights and bias of the logistic regression model.  
+          Code located in [LogisticRegression]().saveModel() method.  
+- **Q3**: save activations on the test set.  
+          Code located in [LogisticRegression]().____() method.  
+- **Q4**: Save predicted values on the test set.  
+          Code located in [LogisticRegression]().____() method.  
+
