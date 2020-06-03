@@ -33,12 +33,18 @@ All codes are located in [LogisticRegression.java]().
 I modified the algorithm to calculate the loss based on the updated weights (re-calculated activation),
 as I think it is much more reasonable as we are interested on the current model's performance,
 not the previous model's one.  
+Note that as [LogisticRegression.java]() handles four questions and saves log,
+it requires five command line arguments (CLAs).
+Five CLAs are the string filepath that specifies the location of the text files 
+that answer of each question be stored (first four arguments) and the log file.
+To get more detailed explanation about the filename,
+please go to [LogisticRegression]().main() method's javaDoc comments.
 
 [Related Questions]  
 - **Q2**: save model weights and bias of the logistic regression model.  
           Code located in [LogisticRegression]().saveModel() method.  
 - **Q3**: save activations on the test set.  
-          Code located in [LogisticRegression]().____() method.  
+          Code located in [LogisticRegression]().saveTestActivation() method.  
 - **Q4**: Save predicted values on the test set.  
-          Code located in [LogisticRegression]().____() method.  
+          Code located in [LogisticRegression]().saveTestPrediction() method.  
 
