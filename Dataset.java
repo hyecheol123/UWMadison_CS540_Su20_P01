@@ -1,6 +1,7 @@
 ///////////////////////////////// FILE HEADER /////////////////////////////////
 //
-// Title:           Dataset
+// Title:           UWMadison_CS540_Su20_P01
+// This File:       Dataset.java
 // Files:           Dataset.java, LogisticRegression.java,
 //                  NeuralNetwork.java
 // External Class:  None
