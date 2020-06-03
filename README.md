@@ -7,6 +7,6 @@ The dataset is given [here](https://pjreddie.com/projects/mnist-in-csv/). We are
 
 ### Data Pre-process
 For both parts, as we are requested to make model to classify the binary class,
-we need to extract two labeled cases among 10 possible labels. In this assignment,
-I am requested to use ***digits 4 (label 0) and 7 (label 1)*** case.  
+we need to extract two labeled cases among 10 possible labels.  
+In this assignment, I am requested to use ***digits 4 (label 0) and 7 (label 1)*** case.  
 Moreover, we also need to ***change pixel intensity to [0, 1]***.
