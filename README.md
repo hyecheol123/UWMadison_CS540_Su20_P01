@@ -23,28 +23,29 @@ All the parsing and data-preprocessing parts are implemented in
 
 [Related Questions]  
 - **Q1**: save Feature Vector of any one training image.   
-          Code located in [LogisticRegression]().saveFeatureVector() method.
+          Code located in [LogisticRegression.saveFeatureVector()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L204) method.
 
 
 ### Logistic Regression Model
 
 For the logistic regression model, we are finding the weights and bias to properly classify the digit image.
-All codes are located in [LogisticRegression.java]().  
+All codes are located in [LogisticRegression.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java).  
 I modified the algorithm to calculate the loss based on the updated weights (re-calculated activation),
 as I think it is much more reasonable as we are interested on the current model's performance,
 not the previous model's one.  
-Note that as [LogisticRegression.java]() handles four questions and saves log,
-it requires five command line arguments (CLAs).
+Note that as [LogisticRegression.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java)
+handles four questions and saves log, it requires five command line arguments (CLAs).
 Five CLAs are the string filepath that specifies the location of the text files 
 that answer of each question be stored (first four arguments) and the log file.
 To get more detailed explanation about the filename,
-please go to [LogisticRegression]().main() method's javaDoc comments.
+please go to [LogisticRegression.main()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L74)
+method's javaDoc comments.
 
 [Related Questions]  
 - **Q2**: save model weights and bias of the logistic regression model.  
-          Code located in [LogisticRegression]().saveModel() method.  
+          Code located in [LogisticRegression.saveModel()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L321) method.  
 - **Q3**: save activations on the test set.  
-          Code located in [LogisticRegression]().saveTestActivation() method.  
+          Code located in [LogisticRegression.saveTestActivation()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L356) method.  
 - **Q4**: Save predicted values on the test set.  
-          Code located in [LogisticRegression]().saveTestPrediction() method.  
+          Code located in [LogisticRegression.saveTestPrediction()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L392) method.  
 
