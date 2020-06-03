@@ -4,7 +4,7 @@
 // This File:       NeuralNetworkFunction.java
 // Files:           LogisticRegression.java, NeuralNetwork.java,
 //                  Dataset.java, NeuralNetworkLayer.java,
-//                  NeuralNetworkFunctions.java
+//                  NeuralNetworkFunction.java
 // External Class:  None
 //
 // GitHub Repo:     https://github.com/hyecheol123/UWMadison_CS540_Su20_P01
@@ -30,7 +30,7 @@
 /**
  * Private inner class having static functions that will be used for gradient descent
  */
-class NeuralNetworkFunctions {
+class NeuralNetworkFunction {
   /**
    * Calculate logistic sigmoid function
    * @param weightedSum input for the function
