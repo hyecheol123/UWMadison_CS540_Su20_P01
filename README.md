@@ -20,3 +20,17 @@ Moreover, we also need to ***change pixel intensity to [0, 1]***.
 
 All the parsing and data-preprocessing parts are implemented in
 [Dataset.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/Dataset.java).
+
+[Related Questions]  
+**Q1**. save Feature Vector of any one training image. 
+        Code located in [LogisticRegression]().saveFeatureVector() method.
+
+
+### Logistic Regression Model
+
+For the logistic regression model, we are finding the weights and bias to properly classify the digit image.
+All codes are located in [LogisticRegression.java]().
+
+[Related Questions]  
+**Q2**. save model weights and bias of the logistic regression model
+        Code located in [LogisticRegression]().saveModel() method.
