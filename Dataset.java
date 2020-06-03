@@ -2,8 +2,9 @@
 //
 // Title:           UWMadison_CS540_Su20_P01
 // This File:       Dataset.java
-// Files:           Dataset.java, LogisticRegression.java,
-//                  NeuralNetwork.java
+// Files:           LogisticRegression.java, NeuralNetwork.java,
+//                  Dataset.java, NeuralNetworkLayer.java,
+//                  NeuralNetworkFunctions.java
 // External Class:  None
 //
 // GitHub Repo:    https://github.com/hyecheol123/UWMadison_CS540_Su20_P01
