@@ -74,7 +74,7 @@ public class LogisticRegression {
   public static void main(String[] args) {
     // Check for the number of command-line arguments
     if(args.length != 5) {
-      System.out.println("Need to have four CLAs, the file names to store text file for each question and for logging.");
+      System.out.println("Need to have five CLAs, the file names to store text file for each question and for logging.");
       exit(1);
     }
 
