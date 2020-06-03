@@ -110,7 +110,7 @@ public class NeuralNetwork {
     ArrayList<ArrayList<Double[]>> activations = new ArrayList<>(NUM_HIDDEN_LAYER + 1);
     activations.set(0, calculateActivation(dataset.getTrainingFeatures(),
         NUM_UNITS[0], layers.get(0))); // first layer (from feature to 1st hidden)
-    for(int layerIndex = 0; layerIndex < NUM_HIDDEN_LAYER + 1; layerIndex++) { // for the other layers
+    for(int layerIndex = 1; layerIndex < NUM_HIDDEN_LAYER + 1; layerIndex++) { // for the other layers
       activations.set(layerIndex, calculateActivation(activations.get(layerIndex - 1),
           NUM_UNITS[layerIndex], layers.get(layerIndex)));
     }
@@ -121,8 +121,17 @@ public class NeuralNetwork {
       System.out.print("Epoch " + epoch + " ");
       logWriter.write("Epoch" + epoch + " ");
 
-      // TODO: Update Weights and Bias
-      // TODO: Calculate New Activation
+      // Update Weights and Bias
+      updateWeightsAndBias(activations);
+
+      // Calculate New Activation
+      activations.set(0, calculateActivation(dataset.getTrainingFeatures(),
+          NUM_UNITS[0], layers.get(0))); // first layer (from feature to 1st hidden)
+      for(int layerIndex = 1; layerIndex < NUM_HIDDEN_LAYER + 1; layerIndex++) { // for the other layers
+        activations.set(layerIndex, calculateActivation(activations.get(layerIndex - 1),
+            NUM_UNITS[layerIndex], layers.get(layerIndex)));
+      }
+
       // TODO: Check for convergence
 
       // Flush log occasionally
@@ -176,6 +185,18 @@ public class NeuralNetwork {
     }
 
     return activation;
+  }
+
+  /**
+   * Private helper method to update Weights and Bias of the neural network
+   *
+   * @param activations previously calculated activation
+   *                    Outer ArrayList - Indicates each layer
+   *                    Inner ArrayList - Indicates data points
+   *                    Double[] Array - The activation of the unit
+   */
+  private static void updateWeightsAndBias(ArrayList<ArrayList<Double[]>> activations) {
+    // TODO Implements
   }
 
 }
