@@ -29,7 +29,10 @@ All the parsing and data-preprocessing parts are implemented in
 ### Logistic Regression Model
 
 For the logistic regression model, we are finding the weights and bias to properly classify the digit image.
-All codes are located in [LogisticRegression.java]().
+All codes are located in [LogisticRegression.java]().  
+I modified the algorithm to calculate the loss based on the updated weights (re-calculated activation),
+as I think it is much more reasonable as we are interested on the current model's performance,
+not the previous model's one.  
 
 [Related Questions]  
 **Q2**. save model weights and bias of the logistic regression model
