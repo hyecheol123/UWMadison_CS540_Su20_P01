@@ -124,9 +124,16 @@ public class NeuralNetwork {
       // TODO: Update Weights and Bias
       // TODO: Calculate New Activation
       // TODO: Check for convergence
-      // TODO: Flush log occasionally
+
+      // Flush log occasionally
+      if(epoch % 10 == 0) {
+        logWriter.flush();
+      }
     }
-    // TODO flush log
+
+    // Flush log
+    logWriter.flush();
+    logWriter.close();
 
     // TODO Questions
   }
