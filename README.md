@@ -49,3 +49,11 @@ method's javaDoc comments.
 - **Q4**: Save predicted values on the test set.  
           Code located in [LogisticRegression.saveTestPrediction()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java#L392) method.  
 
+
+### Neural Network Model
+
+
+## Development/Testing Environment
+- Oracle Java 11.0.5 2019-10-15 LTS
+- Windows 10 Education 1909, Build 18363.836
+- IDE: IntelliJ IDEA 2020.1.2 (Ultimate Edition), Build #IU-201.7846.76
