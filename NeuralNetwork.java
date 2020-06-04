@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import static java.lang.System.exit;
@@ -51,28 +52,29 @@ public class NeuralNetwork {
   static Dataset dataset;
   // Variables for NeuralNetwork
   static ArrayList<NeuralNetworkLayer> layers;
-  // Hyper-parameters
-  final static double EPSILON = 0.00000001;
-  // For checking convergence
-  static double currentLoss = 0;
-  static double previousLoss = 0;
-  final static int MAX_EPOCH = 5000;
+  // Network Characteristic (Arguments)
+  final static String CSV_FILE_LOCATION = "mnist_train.csv";
+  final static int NUM_WORKERS = 8; // number of threads to run in parallel
+  static ArrayList<NeuralNetworkLayer> bestLayers;
   // Counting training epochs
   static int epoch;
-  final static double LEARNING_RATE = 0.00001; // 0.0001
+  static int bestEpoch;
+  // For checking convergence
+  static double currentLoss = 0;
 
-  // Constants
-  final static String CSV_FILE_LOCATION = "mnist_train.csv";
+  // Hyper-parameters
+  final static double EPSILON = 0.00000001;
+  final static int MAX_EPOCH = 5000;
+  final static double LEARNING_RATE = 0.00001; // 0.0001
+  static double previousLoss = 0;
   final static String TEST_SET_LOCATION = "test.txt";
   final static int LABEL0 = 4;
   final static int LABEL1 = 7;
+  static double bestLoss = Double.POSITIVE_INFINITY;
   final static int NUM_HIDDEN_LAYER = 1;
   final static int NUM_FEATURE = 784; // MNIST
   final static int[] NUM_UNITS = {392, 1}; // last entry is the number of output
   final static long RANDOM_SEED = 2006031213;
-  static ArrayList<NeuralNetworkLayer> bestLayers;
-  static double bestLoss = Double.POSITIVE_INFINITY;
-  static int bestEpoch;
 
   /**
    * main method of NeuralNetwork Class
@@ -213,30 +215,78 @@ public class NeuralNetwork {
                                                          int numUnits, NeuralNetworkLayer layer) {
     // Frequently used variables
     int numDataEntries = prevActivation.size();
+    int numThread = Math.min(NUM_WORKERS, numDataEntries); // the number of threads that will be used
 
-    ArrayList<Double[]> activation = new ArrayList<>(numDataEntries); // place to store activation
+    // place to store activation
+    ArrayList<Double[]> activation = new ArrayList<>(Collections.nCopies(numDataEntries, null));
     // retrieve weights and bias
     Double[][] weights = layer.getWeights();
     Double[] bias = layer.getBias();
 
-    for(int dataIndex = 0; dataIndex < numDataEntries; dataIndex++) { // for all data entry
-      activation.add(dataIndex, new Double[numUnits]); // set the Double array storing activation
+    // Method-inner class to calculate activation in parallel
+    class CalcActivationRunnable implements Runnable {
+      // for start and ending index of data entries to calculate within the thread
+      final int start;
+      final int end;
 
-      // Frequently using data
-      Double[] prevActivationAtData = prevActivation.get(dataIndex);
-      Double[] currentActivation = activation.get(dataIndex);
+      // Constructor of CalcActivationThread, setting start and end index of data entries
+      CalcActivationRunnable(int start, int end) {
+        this.start = start;
+        this.end = end;
+      }
 
-      // calculate activation for each hidden Units
-      for(int hiddenUnitIndex = 0; hiddenUnitIndex < numUnits; hiddenUnitIndex++) {
-        // calculate weighted sum
-        double weightedSum = 0.0;
-        for(int prevActivationIndex = 0; prevActivationIndex < prevActivationAtData.length; prevActivationIndex++) {
-          weightedSum += weights[prevActivationIndex][hiddenUnitIndex] * prevActivationAtData[prevActivationIndex];
+      @Override
+      public void run() {
+        for(int dataIndex = start; dataIndex < end; dataIndex++) { // for all data entries
+          activation.set(dataIndex, new Double[numUnits]); // set the Double array storing activation
+
+          // Frequently using data
+          Double[] prevActivationAtData = prevActivation.get(dataIndex);
+          Double[] currentActivation = activation.get(dataIndex);
+
+          // calculate activation for each hidden Units
+          for(int hiddenUnitIndex = 0; hiddenUnitIndex < numUnits; hiddenUnitIndex++) {
+            // calculate weighted sum
+            double weightedSum = 0.0;
+            for(int prevActivationIndex = 0; prevActivationIndex < prevActivationAtData.length; prevActivationIndex++) {
+              weightedSum += weights[prevActivationIndex][hiddenUnitIndex] * prevActivationAtData[prevActivationIndex];
+            }
+            weightedSum += bias[hiddenUnitIndex];
+
+            // calculate activation based on the weighted sum
+            currentActivation[hiddenUnitIndex] = NeuralNetworkFunction.logisticSigmoid(weightedSum);
+          }
         }
-        weightedSum += bias[hiddenUnitIndex];
+      }
+    }
 
-        // calculate activation based on the weighted sum
-        currentActivation[hiddenUnitIndex] = NeuralNetworkFunction.logisticSigmoid(weightedSum);
+    // Place to store Threads
+    Runnable[] runnables = new Runnable[numThread];
+    Thread[] threads = new Thread[numThread];
+
+    // for all data entry, setup new Runnable and launch a thread
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      // Setup new Runnable
+      if(threadIndex == numThread - 1) { // for last thread
+        // need to iterate to the end of the data entries
+        runnables[threadIndex] = new CalcActivationRunnable((numDataEntries / numThread) * threadIndex, numDataEntries);
+      } else { // for other cases
+        runnables[threadIndex] = new CalcActivationRunnable((numDataEntries / numThread) * threadIndex,
+            (numDataEntries / numThread) * (threadIndex + 1));
+      }
+
+      // launch thread
+      threads[threadIndex] = new Thread(runnables[threadIndex]);
+      threads[threadIndex].start();
+    }
+
+    // wait for threads to finsh execution
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      try {
+        threads[threadIndex].join();
+      } catch(InterruptedException e) {
+        System.out.println("Thread " + threads[threadIndex].getName() + " Interrupted");
+        e.printStackTrace();
       }
     }
 
@@ -258,21 +308,20 @@ public class NeuralNetwork {
     ArrayList<Integer> trueLabel = dataset.getTrainingLabels();
     ArrayList<Double[]> outputLayerActivation = activations.get(1);
 
-    // Calculate derivative of Loss function w.r.t. net input of output layer
-    // dL/dz_output
-    double[] derivLoss = new double[dataLength];
-    for(int dataIndex = 0; dataIndex < dataLength; dataIndex++) {
-      derivLoss[dataIndex] = outputLayerActivation.get(dataIndex)[0] - trueLabel.get(dataIndex);
-    }
-
     // variables and constant used frequently
     Double[][] hiddenLayerWeight = layers.get(0).getWeights();
     Double[] hiddenLayerBias = layers.get(0).getBias();
     Double[][] outputLayerWeight = layers.get(1).getWeights();
     Double[] outputLayerBias = layers.get(1).getBias();
 
-    // Update Hidden Layer (first layer)
+    // derivatives of Loss function
+    double[] derivLoss = new double[dataLength];
+
     for(int dataIndex = 0; dataIndex < dataLength; dataIndex++) {
+      // Calculate derivative of Loss function w.r.t. net input of output layer
+      derivLoss[dataIndex] = outputLayerActivation.get(dataIndex)[0] - trueLabel.get(dataIndex); // dL/dz_output
+
+      // Update Hidden Layer (first layer)
       // variables and constant used frequently
       Double[] activation = activations.get(0).get(dataIndex);
       Double[] features = dataset.getTrainingFeatures().get(dataIndex);
