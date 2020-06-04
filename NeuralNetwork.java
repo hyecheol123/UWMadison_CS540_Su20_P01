@@ -132,7 +132,12 @@ public class NeuralNetwork {
             NUM_UNITS[layerIndex], layers.get(layerIndex)));
       }
 
-      // TODO: Check for convergence
+      // Check for convergence
+      if(checkConvergence(activations.get(NUM_HIDDEN_LAYER), logWriter)) { // when converge
+        System.out.println("Converged after Epoch " + epoch);
+        logWriter.write("Converged after Epoch " + epoch + "\n");
+        break;
+      }
 
       // Flush log occasionally
       if(epoch % 10 == 0) {
@@ -197,6 +202,18 @@ public class NeuralNetwork {
    */
   private static void updateWeightsAndBias(ArrayList<ArrayList<Double[]>> activations) {
     // TODO Implements
+  }
+
+  /**
+   * Private helper method to check convergence by calculating loss function
+   *
+   * @param output    output with updated weight and bias
+   * @param logWriter FileWriter of log file
+   * @return whether the model has been converged or not
+   */
+  private static boolean checkConvergence(ArrayList<Double[]> output, FileWriter logWriter) {
+    // TODO Implement
+    return false;
   }
 
 }
