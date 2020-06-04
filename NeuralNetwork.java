@@ -28,6 +28,9 @@
 //   3. Testing parts in main() only work for one output case
 //   3. Rather than using hard coded parameters and hyper-parameter,
 //          Need to find alternative ways to get parameter as CLAs in future.
+//   4. Slow speed.
+//          May boost up by using parallel computation (multi-thread),
+//          or using third-party library to boost matrix multiplication
 //
 /////////////////////////////// 80 COLUMNS WIDE //////////////////////////////
 
