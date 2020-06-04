@@ -210,10 +210,24 @@ public class NeuralNetwork {
    * @param output    output with updated weight and bias
    * @param logWriter FileWriter of log file
    * @return whether the model has been converged or not
+   * @throws IOException while writing log file, IOException might be occurred.
    */
-  private static boolean checkConvergence(ArrayList<Double[]> output, FileWriter logWriter) {
-    // TODO Implement
-    return false;
+  private static boolean checkConvergence(ArrayList<Double[]> output, FileWriter logWriter) throws IOException {
+    previousLoss = currentLoss; // assign previous loss
+
+    // calculate current loss
+    currentLoss = 0;
+    for(int dataIndex = 0; dataIndex < output.size(); dataIndex++) {
+      currentLoss += NeuralNetworkFunction.binaryCrossEntropy(
+          dataset.getTrainingLabels().get(dataIndex), output.get(dataIndex)[0]);
+    }
+
+    // logging
+    System.out.println("Loss: " + currentLoss);
+    logWriter.write("Loss: " + currentLoss + "\n");
+
+    // Check for convergence
+    return Math.abs(previousLoss - currentLoss) < EPSILON;
   }
 
 }
