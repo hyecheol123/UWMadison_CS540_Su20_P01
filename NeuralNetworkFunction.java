@@ -37,7 +37,7 @@ class NeuralNetworkFunction {
    * @return return of logistic sigmoid function
    */
   public static double logisticSigmoid(double weightedSum) {
-    return 1.0 / (1.0 + Math.exp(-1 * weightedSum));
+    return 1.0 / (1.0 + Math.exp(-1.0 * weightedSum));
   }
 
   /**
@@ -47,7 +47,7 @@ class NeuralNetworkFunction {
    * @return differentiation of logistic sigmoid
    */
   public static double diffLogisticSigmoid(double activation) {
-    return activation * (1 - activation);
+    return activation * (1.0 - activation);
   }
 
   /**
@@ -55,30 +55,22 @@ class NeuralNetworkFunction {
    * C = -{y * log(a) + (1 - y) * log(1 - a)}
    *
    * @param prediction predicted output (activation)
-   * @param label truth label
+   * @param label      truth label
    * @return calculation of binary cross entropy
    */
-  public static double binaryCrossEntropy(double prediction, double label) {
+  public static double binaryCrossEntropy(double prediction, int label) {
     if(label == 1) {
-      return (-1) * (label * Math.log(prediction));
+      if(prediction < 0.0001) { // To prevent NaN and Inf, for the cases possibly cause Inf, just add a large number
+        return 100;
+      } else {
+        return (-1.0) * Math.log(prediction);
+      }
     } else { // when label is 0
-      return (-1) * ((1 - label) * Math.log(1 - prediction));
-    }
-  }
-
-  /**
-   * calculate differentiation of binary cross entropy for each data point (prediction)
-   * dC/da = ((1-y)/(1-a) - y/a)
-   *
-   * @param prediction predicted output (activation)
-   * @param label truth label
-   * @return differentiation of binary cross entropy
-   */
-  public static double diffBinaryCrossEntropy(double prediction, double label) {
-    if(label == 1) {
-      return (-1) * (label / prediction);
-    } else { // when label is 0
-      return (1 - label) / (1 - prediction);
+      if(prediction > 0.9999) { // To prevent NaN and Inf, for the cases possibly cause Inf, just add a large number
+        return 100;
+      } else {
+        return (-1.0) * Math.log(1.0 - prediction);
+      }
     }
   }
 }

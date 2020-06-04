@@ -34,13 +34,25 @@ import java.util.Random;
  */
 class NeuralNetworkLayer {
   // Class Variables
-  private Double[][] weights;
-  private Double[] bias;
+  private final Double[][] weights;
+  private final Double[] bias;
+
+  /**
+   * Initialize NeuralNetworkLayer with given weights and bias,
+   * for making duplicated layer
+   *
+   * @param weights 2D array of Double, containing weights information
+   * @param bias    1D array of Double, containing bias information
+   */
+  NeuralNetworkLayer(Double[][] weights, Double[] bias) {
+    this.weights = weights;
+    this.bias = bias;
+  }
 
   /**
    * Initialize NeuralNetworkLayer, with weights and bias initialized to 0.0
    *
-   * @param input input dimension
+   * @param input  input dimension
    * @param output output dimension
    */
   NeuralNetworkLayer(int input, int output) {
@@ -85,5 +97,9 @@ class NeuralNetworkLayer {
    */
   public Double[] getBias() {
     return bias;
+  }
+
+  public NeuralNetworkLayer getDuplicated() {
+    return new NeuralNetworkLayer(this.weights, this.bias);
   }
 }
