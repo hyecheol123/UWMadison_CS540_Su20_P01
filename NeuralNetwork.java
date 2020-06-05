@@ -28,9 +28,8 @@
 //   3. Testing parts in main() only work for one output case
 //   3. Rather than using hard coded parameters and hyper-parameter,
 //          Need to find alternative ways to get parameter as CLAs in future.
-//   4. Slow speed.
-//          May boost up by using parallel computation (multi-thread),
-//          or using third-party library to boost matrix multiplication
+//   4. Have room to boost up the speed
+//          by using third-party library to boost matrix multiplication
 //
 /////////////////////////////// 80 COLUMNS WIDE //////////////////////////////
 
@@ -40,6 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 import static java.lang.System.exit;
 
@@ -63,9 +63,9 @@ public class NeuralNetwork {
   static double currentLoss = 0;
 
   // Hyper-parameters
-  final static double EPSILON = 0.00000001;
-  final static int MAX_EPOCH = 5000;
-  final static double LEARNING_RATE = 0.00001; // 0.0001
+  final static double EPSILON = 0.000001;
+  final static int MAX_EPOCH = 500;
+  final static double LEARNING_RATE = 0.00002;
   static double previousLoss = 0;
   final static String TEST_SET_LOCATION = "test.txt";
   final static int LABEL0 = 4;
@@ -87,8 +87,9 @@ public class NeuralNetwork {
    *             4. Question 9 save file name (saveMostUncertainTestFeature)
    *             5. log file
    * @throws IOException while writing file, IOException might be occurred.
+   * @throws InterruptedException May throw InterruptException if Thread interrupted
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     // Check for the number of command=line arguments
     if(args.length != 6) {
       System.out.println("Need to have Six CLAs, the file names to store text file for each question and for logging.");
@@ -207,12 +208,13 @@ public class NeuralNetwork {
    * @param prevActivation ArrayList of Double array containing activation from the previous layer
    *                       (if this is first hidden layer, get features).
    *                       Each entry of ArrayList contains activation calculated for each data point
-   * @param numUnits number of units in current layer
-   * @param layer NeuralNetworkLayer object that contains weights and bias information
+   * @param numUnits       number of units in current layer
+   * @param layer          NeuralNetworkLayer object that contains weights and bias information
    * @return ArrayList of Double array containing activation for current hidden layer
+   * @throws InterruptedException May throw InterruptException if Thread interrupted
    */
-  private static ArrayList<Double[]> calculateActivation(ArrayList<Double[]> prevActivation,
-                                                         int numUnits, NeuralNetworkLayer layer) {
+  private static ArrayList<Double[]> calculateActivation(
+      ArrayList<Double[]> prevActivation, int numUnits, NeuralNetworkLayer layer) throws InterruptedException {
     // Frequently used variables
     int numDataEntries = prevActivation.size();
     int numThread = Math.min(NUM_WORKERS, numDataEntries); // the number of threads that will be used
@@ -280,14 +282,9 @@ public class NeuralNetwork {
       threads[threadIndex].start();
     }
 
-    // wait for threads to finsh execution
+    // wait for threads to finish execution
     for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
-      try {
-        threads[threadIndex].join();
-      } catch(InterruptedException e) {
-        System.out.println("Thread " + threads[threadIndex].getName() + " Interrupted");
-        e.printStackTrace();
-      }
+      threads[threadIndex].join();
     }
 
     return activation;
@@ -301,58 +298,175 @@ public class NeuralNetwork {
    *                    Outer ArrayList - Indicates each layer
    *                    Inner ArrayList - Indicates data points
    *                    Double[] Array - The activation of the unit
+   * @throws InterruptedException May throw InterruptException if Thread interrupted
    */
-  private static void updateWeightsAndBias(ArrayList<ArrayList<Double[]>> activations) {
+  private static void updateWeightsAndBias(ArrayList<ArrayList<Double[]>> activations) throws InterruptedException {
     // variables and constant used frequently
     int dataLength = activations.get(0).size();
     ArrayList<Integer> trueLabel = dataset.getTrainingLabels();
     ArrayList<Double[]> outputLayerActivation = activations.get(1);
-
-    // variables and constant used frequently
+    int numThread = Math.min(NUM_WORKERS, dataLength); // the number of threads that will be used
     Double[][] hiddenLayerWeight = layers.get(0).getWeights();
     Double[] hiddenLayerBias = layers.get(0).getBias();
     Double[][] outputLayerWeight = layers.get(1).getWeights();
     Double[] outputLayerBias = layers.get(1).getBias();
 
+    // For concurrency lock
+    ArrayList<Semaphore> hiddenUnitSem = new ArrayList<>(NUM_UNITS[0] + 1);
+    for(int i = 0; i < NUM_UNITS[0] + 1; i++) {
+      hiddenUnitSem.add(new Semaphore(1));
+    }
+
+    // For faster performance by using permutation
+    ArrayList<ArrayList<Integer>> hiddenUnitOrders = new ArrayList<>(numThread);
+    for(int i = 0; i < numThread; i++) {
+      hiddenUnitOrders.add(i, new ArrayList<>(NUM_UNITS[0]));
+      for(int j = 0; j < NUM_UNITS[0]; j++) {
+        hiddenUnitOrders.get(i).add(j);
+      }
+      Collections.shuffle(hiddenUnitOrders.get(i));
+    }
+
+    // Place to store Threads
+    Runnable[] runnables = new Runnable[numThread];
+    Thread[] threads = new Thread[numThread];
+
     // derivatives of Loss function
     double[] derivLoss = new double[dataLength];
 
-    for(int dataIndex = 0; dataIndex < dataLength; dataIndex++) {
-      // Calculate derivative of Loss function w.r.t. net input of output layer
-      derivLoss[dataIndex] = outputLayerActivation.get(dataIndex)[0] - trueLabel.get(dataIndex); // dL/dz_output
+    // Method-inner class to update hidden layer in parallel
+    class UpdateHiddenRunnable implements Runnable {
+      // for start and ending index of data entries to calculate within the thread
+      final int start;
+      final int end;
+      final int threadIndex;
 
-      // Update Hidden Layer (first layer)
-      // variables and constant used frequently
-      Double[] activation = activations.get(0).get(dataIndex);
-      Double[] features = dataset.getTrainingFeatures().get(dataIndex);
+      // Constructor of CalcActivationThread, setting start and end index of data entries
+      UpdateHiddenRunnable(int start, int end, int threadIndex) {
+        this.start = start;
+        this.end = end;
+        this.threadIndex = threadIndex;
+      }
 
-      for(int hiddenUnitIndex = 0; hiddenUnitIndex < NUM_UNITS[0]; hiddenUnitIndex++) {
-        // update bias
-        hiddenLayerBias[hiddenUnitIndex] -= LEARNING_RATE
-            * (derivLoss[dataIndex] * outputLayerWeight[hiddenUnitIndex][0]
-            * NeuralNetworkFunction.diffLogisticSigmoid(activation[hiddenUnitIndex]) * 1.0);
+      @Override
+      public void run() {
+        // get permutation of unit order
+        ArrayList<Integer> unitOrder = hiddenUnitOrders.get(threadIndex);
 
-        for(int featureIndex = 0; featureIndex < NUM_FEATURE; featureIndex++) {
-          // Update weight
-          hiddenLayerWeight[featureIndex][hiddenUnitIndex] -= LEARNING_RATE
-              * (derivLoss[dataIndex] * outputLayerWeight[hiddenUnitIndex][0]
-              * NeuralNetworkFunction.diffLogisticSigmoid(activation[hiddenUnitIndex]) * features[featureIndex]);
+        for(int dataIndex = start; dataIndex < end; dataIndex++) {
+          // Calculate derivative of Loss function w.r.t. net input of output layer
+          derivLoss[dataIndex] = outputLayerActivation.get(dataIndex)[0] - trueLabel.get(dataIndex); // dL/dz_output
+
+          // Update Hidden Layer (first layer)
+          // variables and constant used frequently
+          Double[] activation = activations.get(0).get(dataIndex);
+          Double[] features = dataset.getTrainingFeatures().get(dataIndex);
+
+          for(int hiddenUnitIndex : unitOrder) {
+            // Get Semaphore Lock
+            hiddenUnitSem.get(hiddenUnitIndex).acquireUninterruptibly();
+
+            // update bias
+            hiddenLayerBias[hiddenUnitIndex] -= LEARNING_RATE
+                * (derivLoss[dataIndex] * outputLayerWeight[hiddenUnitIndex][0]
+                * NeuralNetworkFunction.diffLogisticSigmoid(activation[hiddenUnitIndex]) * 1.0);
+
+            for(int featureIndex = 0; featureIndex < NUM_FEATURE; featureIndex++) {
+              // Update weight
+              hiddenLayerWeight[featureIndex][hiddenUnitIndex] -= LEARNING_RATE
+                  * (derivLoss[dataIndex] * outputLayerWeight[hiddenUnitIndex][0]
+                  * NeuralNetworkFunction.diffLogisticSigmoid(activation[hiddenUnitIndex]) * features[featureIndex]);
+            }
+
+            // release lock
+            hiddenUnitSem.get(hiddenUnitIndex).release();
+          }
         }
       }
     }
 
-    // Update output layer
-    for(int dataIndex = 0; dataIndex < dataLength; dataIndex++) {
-      // update bias
-      outputLayerBias[0] -= LEARNING_RATE * (derivLoss[dataIndex] * 1.0);
-
-      // variables and constant used frequently
-      Double[] activation = activations.get(0).get(dataIndex);
-
-      for(int weightIndex = 0; weightIndex < NUM_UNITS[0]; weightIndex++) {
-        // update documents
-        outputLayerWeight[weightIndex][0] -= LEARNING_RATE * (derivLoss[dataIndex] * activation[weightIndex]);
+    // Updating hidden layers
+    // for all data entry, setup new Runnable and launch a thread
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      // Setup new Runnable
+      if(threadIndex == numThread - 1) { // for last thread
+        // need to iterate to the end of the data entries
+        runnables[threadIndex] = new UpdateHiddenRunnable((dataLength / numThread) * threadIndex,
+            dataLength, threadIndex);
+      } else { // for other cases
+        runnables[threadIndex] = new UpdateHiddenRunnable((dataLength / numThread) * threadIndex,
+            (dataLength / numThread) * (threadIndex + 1), threadIndex);
       }
+
+      // launch thread
+      threads[threadIndex] = new Thread(runnables[threadIndex]);
+      threads[threadIndex].start();
+    }
+
+    // wait for threads to finish execution
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      threads[threadIndex].join();
+    }
+
+    // Method-inner class to update output layer in parallel
+    class UpdateOutRunnable implements Runnable {
+      // for start and ending index of data entries to calculate within the thread
+      final int start;
+      final int end;
+      final int threadIndex;
+
+      // Constructor of CalcActivationThread, setting start and end index of data entries
+      UpdateOutRunnable(int start, int end, int threadIndex) {
+        this.start = start;
+        this.end = end;
+        this.threadIndex = threadIndex;
+      }
+
+      @Override
+      public void run() {
+        // get permutation of unit order
+        ArrayList<Integer> unitOrder = hiddenUnitOrders.get(threadIndex);
+
+        for(int dataIndex = start; dataIndex < end; dataIndex++) {
+          // variables and constant used frequently
+          Double[] activation = activations.get(0).get(dataIndex);
+
+          // update bias
+          hiddenUnitSem.get(NUM_UNITS[0]).acquireUninterruptibly();
+          outputLayerBias[0] -= LEARNING_RATE * (derivLoss[dataIndex] * 1.0);
+          hiddenUnitSem.get(NUM_UNITS[0]).release();
+
+          for(int weightIndex : unitOrder) {
+            // update weights
+            hiddenUnitSem.get(weightIndex).acquireUninterruptibly();
+            outputLayerWeight[weightIndex][0] -= LEARNING_RATE * (derivLoss[dataIndex] * activation[weightIndex]);
+            hiddenUnitSem.get(weightIndex).release();
+          }
+        }
+      }
+    }
+
+    // Updating output layers
+    // for all data entry, setup new Runnable and launch a thread
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      // Setup new Runnable
+      if(threadIndex == numThread - 1) { // for last thread
+        // need to iterate to the end of the data entries
+        runnables[threadIndex] = new UpdateOutRunnable((dataLength / numThread) * threadIndex,
+            dataLength, threadIndex);
+      } else { // for other cases
+        runnables[threadIndex] = new UpdateOutRunnable((dataLength / numThread) * threadIndex,
+            (dataLength / numThread) * (threadIndex + 1), threadIndex);
+      }
+
+      // launch thread
+      threads[threadIndex] = new Thread(runnables[threadIndex]);
+      threads[threadIndex].start();
+    }
+
+    // wait for threads to finish execution
+    for(int threadIndex = 0; threadIndex < numThread; threadIndex++) {
+      threads[threadIndex].join();
     }
   }
 
