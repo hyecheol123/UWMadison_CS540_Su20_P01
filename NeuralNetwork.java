@@ -64,8 +64,8 @@ public class NeuralNetwork {
 
   // Hyper-parameters
   final static double EPSILON = 0.000001;
-  final static int MAX_EPOCH = 500;
-  final static double LEARNING_RATE = 0.00002;
+  final static int MAX_EPOCH = 5000;
+  final static double LEARNING_RATE = 0.000025;
   static double previousLoss = 0;
   final static String TEST_SET_LOCATION = "test.txt";
   final static int LABEL0 = 4;
