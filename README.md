@@ -30,9 +30,11 @@ All the parsing and data-preprocessing parts are implemented in
 
 For the logistic regression model, we are finding the weights and bias to properly classify the digit image.
 All codes are located in [LogisticRegression.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java).  
+
 I modified the algorithm to calculate the loss based on the updated weights (re-calculated activation),
 as I think it is much more reasonable as we are interested on the current model's performance,
 not the previous model's one.  
+
 Note that as [LogisticRegression.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/LogisticRegression.java)
 handles four questions and saves log, it requires five command line arguments (CLAs).
 Five CLAs are the string filepath that specifies the location of the text files 
@@ -51,6 +53,21 @@ method's javaDoc comments.
 
 
 ### Neural Network Model
+
+For the second part of this assignment, we are requested to code neural network model having one hidden layer.
+The hidden layer has 392 hidden units, that is half of the input.
+For the activation of both layer is logistic sigmoid and binary cross entropy has been used for its loss function.
+The implementation of the logistic sigmoid and binary cross entropy can be found in
+[NeuralNetworkFunction.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetworkFunction.java).  
+Due to the complexity of the model structure and increase re-usability of the codes in future assignments,
+I decide to split the layers (weights and bias information) as a separated class
+([NeuralNetworkLayer.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetworkLayer.java)).
+The main method and other functions that specifically designed for this assignment is located in
+[NeuralNetwork.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java).  
+
+Same as the Logistic Regression model, I calculate the loss(cost) based on the updated weights
+(after re-calculating the activation with updated weights), as I want to check current model's performance,
+not the previous one. 
 
 
 ## Development/Testing Environment
