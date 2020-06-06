@@ -67,7 +67,20 @@ The main method and other functions that specifically designed for this assignme
 
 Same as the Logistic Regression model, I calculate the loss(cost) based on the updated weights
 (after re-calculating the activation with updated weights), as I want to check current model's performance,
-not the previous one. 
+not the previous one.  
+Moreover, to boost up the speed,
+for the functions that involves heavy calculation
+([calculateActivation()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L216) and
+[updateWeightsAndBias()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L303)), 
+I implemented parallel computation code using more than one threads (The number of threads is defined at NUM_WORKERS). 
+
+Note that as [NeuralNetwork.java](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java)
+handles six command line arguments (CLAs) which incidates output filename for five questions and one log file.
+To get more detailed explaination of the CLAs, please go to javaDoc comments of
+[NeuralNetwork.main()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L92).
+
+[Related Questions]
+- 
 
 
 ## Development/Testing Environment
