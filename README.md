@@ -80,7 +80,16 @@ To get more detailed explaination of the CLAs, please go to javaDoc comments of
 [NeuralNetwork.main()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L92).
 
 [Related Questions]
-- 
+- **Q5**: Save first layer's weights and bias of the neural network  
+          Code located in [NeuralNetwork.saveFirstLayerWeightAndBias()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L518)
+- **Q6**: Save second layer's weights and bias of the neural network  
+          Code located in [NeuralNetwork.saveSecondLayerWeightAndBias()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L552)
+- **Q7**: Save output layer's activation that created with the test set  
+          Code located in [NeuralNetwork.saveOutputActivationTest()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L580)
+- **Q8**: Save the prediction of the model that created with the test set  
+          Code located in [NeuralNetwork.saveOutputPredictionTest()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L604)
+- **Q9**: Save the feature in the test set that make most ambiguous prediction  
+          Code located in [NeuralNetwork.saveMostUncertainTestFeature()](https://github.com/hyecheol123/UWMadison_CS540_Su20_P01/blob/master/NeuralNetwork.java#L627)
 
 
 ## Development/Testing Environment

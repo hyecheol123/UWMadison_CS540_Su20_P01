@@ -64,8 +64,8 @@ public class NeuralNetwork {
 
   // Hyper-parameters
   final static double EPSILON = 0.000001;
-  final static int MAX_EPOCH = 5000;
-  final static double LEARNING_RATE = 0.00005;
+  final static int MAX_EPOCH = 2000;
+  final static double LEARNING_RATE = 0.00075;
   static double previousLoss = 0;
   final static String TEST_SET_LOCATION = "test.txt";
   final static int LABEL0 = 4;
@@ -544,7 +544,7 @@ public class NeuralNetwork {
   }
 
   /**
-   * Method to handle Question 6 - save first layer weights and bias
+   * Method to handle Question 6 - save second layer weights and bias
    *
    * @param filename filename to save the answer
    * @throws IOException while writing the file, may throw IOException
